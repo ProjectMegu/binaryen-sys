@@ -8,6 +8,7 @@ description = "Rust Raw Bindings for binaryen"
 readme = "README.md"
 keywords = ["binaryen", "binding", "wasm", "webassembly"]
 categories = ["webassembly", "external-ffi-bindings"]
+repository = "https://github.com/ProjectMegu/binaryen-sys"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
