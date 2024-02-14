@@ -1,0 +1,7 @@
+services:
+  env:
+    build: ./.devcontainer
+    tty: true
+    working_dir: /workspace
+    volumes:
+      - .:/workspace
