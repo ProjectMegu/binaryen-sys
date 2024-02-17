@@ -4,40 +4,51 @@ const BINARYEN_URL: &str = "https://github.com/WebAssembly/binaryen.git";
 const CMAKE_ARGS: [&str;2] = ["-DBUILD_TESTS=OFF", "-DBUILD_TOOLS=OFF"];
 
 fn main() {
-    println!("cargo:rerun-if-changed=build.rs");
-    // println!("cargo:rerun-if-changed=Cargo.toml");
+    if std::env::var("DOCS_RS").is_err() {
+        println!("cargo:rerun-if-changed=build.rs");
+        // println!("cargo:rerun-if-changed=Cargo.toml");
     
-    let out_dir = std::env::var("OUT_DIR").unwrap();
+        let out_dir = std::env::var("OUT_DIR").unwrap();
     
-    let blib_path: PathBuf;
-    let binclude_path: PathBuf;
+        let blib_path: PathBuf;
+        let binclude_path: PathBuf;
 
-    if let Ok(bpath) = std::env::var("BINARYEN_PATH") {
-        blib_path = Path::new(&bpath).join("lib");
-        binclude_path = Path::new(&bpath).join("include");
-    } else if let Some(bpath) = serch_binaryen() {
-        blib_path = bpath.join("lib");
-        binclude_path = bpath.join("include");
+        if let Ok(bpath) = std::env::var("BINARYEN_PATH") {
+            blib_path = Path::new(&bpath).join("lib");
+            binclude_path = Path::new(&bpath).join("include");
+        } else if let Some(bpath) = serch_binaryen() {
+            blib_path = bpath.join("lib");
+            binclude_path = bpath.join("include");
+        } else {
+            let (lib_path, include_path) = build_binaryen(&out_dir);
+            blib_path = lib_path;
+            binclude_path = include_path;
+        }
+
+        println!("cargo:rustc-link-search={}", blib_path.to_str().unwrap());
+        println!("cargo:rustc-link-lib=binaryen");
+
+        // bindgen
+        let bindings = bindgen::Builder::default()
+            .header(
+                binclude_path.join("binaryen-c.h").to_str().unwrap()
+            )
+            .parse_callbacks(Box::new(bindgen::CargoCallbacks::new()))
+            .generate()
+            .expect("Unable to generate bindings");
+
+        bindings.write_to_file(Path::new(&out_dir).join("bindings.rs"))
+            .expect("Couldn't write bindings!");
     } else {
-        let (lib_path, include_path) = build_binaryen(&out_dir);
-        blib_path = lib_path;
-        binclude_path = include_path;
+        let binding = bindgen::Builder::default()
+            .header("libs/include/binaryen-c.h")
+            .parse_callbacks(Box::new(bindgen::CargoCallbacks::new()))
+            .generate()
+            .expect("Unable to generate bindings");
+        
+        binding.write_to_file(Path::new(&std::env::var("OUT_DIR").unwrap()).join("bindings.rs"))
+            .expect("Couldn't write bindings!");
     }
-
-    println!("cargo:rustc-link-search={}", blib_path.to_str().unwrap());
-    println!("cargo:rustc-link-lib=binaryen");
-
-    // bindgen
-    let bindings = bindgen::Builder::default()
-        .header(
-            binclude_path.join("binaryen-c.h").to_str().unwrap()
-        )
-        .parse_callbacks(Box::new(bindgen::CargoCallbacks::new()))
-        .generate()
-        .expect("Unable to generate bindings");
-
-    bindings.write_to_file(Path::new(&out_dir).join("bindings.rs"))
-        .expect("Couldn't write bindings!");
 }
 
 fn build_binaryen(out_dir: &String) -> (PathBuf, PathBuf){

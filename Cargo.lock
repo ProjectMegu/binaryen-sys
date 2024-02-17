@@ -13,7 +13,7 @@ dependencies = [
 
 [[package]]
 name = "binaryen_capi-sys"
-version = "116.0.0"
+version = "0.116.1"
 dependencies = [
  "bindgen",
 ]
