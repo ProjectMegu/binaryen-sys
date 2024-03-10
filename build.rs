@@ -27,6 +27,7 @@ fn main() {
 
         println!("cargo:rustc-link-search={}", blib_path.to_str().unwrap());
         println!("cargo:rustc-link-lib=binaryen");
+        println!("cargo:rustc-link-lib=stdc++");
 
         // bindgen
         let bindings = bindgen::Builder::default()

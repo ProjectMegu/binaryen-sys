@@ -1,7 +1,8 @@
 //! # Rust Raw Bindings for Binaryen C API
 //! ## Requestments
 //! * Installed Binaryen  (If it is nothing, this library will build binaryen. but need very long time(about 4m30s))
-//! 
+//! * clang (for genetate binaryen)
+//! * libstdc++
 //! 
 //! When searching for the binaryen path, this library calculates backwards from the `wasm-opt` path.
 //! Be sure to set binaryen in the Path environment variable.

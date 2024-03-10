@@ -1,6 +1,6 @@
 [package]
 name = "binaryen_capi-sys"
-version = "0.116.1"
+version = "0.117.0"
 edition = "2021"
 authors = ["sakura-aoi"]
 license = "Apache-2.0"
